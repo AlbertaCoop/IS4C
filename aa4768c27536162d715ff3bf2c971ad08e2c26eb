@@ -1,0 +1,7 @@
+Provides more WHERE conditions to filter irrelevant transaction
+records, as a stop-gap until this is handled more uniformly across the
+application.  At least one condition where these additional conditions
+are needed is when the table dlog_15 is used, for which no filters are
+provided (since it's a table, not a view).  Other report classes may
+have this issue, and thus also need this stop-gap.  The real solution
+probably lies in uniformly using views, such as dlog.
