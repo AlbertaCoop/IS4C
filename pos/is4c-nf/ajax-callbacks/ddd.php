@@ -25,17 +25,27 @@ ini_set('display_errors','Off');
 include_once(dirname(__FILE__).'/../lib/AutoLoader.php');
 
 /*
- * DDD is WFC lingo for unsaleable goods (dropped, dented, damaged, etc)
- * Functionally this works like canceling a transaction, but marks
- * items with a different trans_status (Z) so these items can
- * be pulled out in later reports
+ * Mark items as shrink/unsellable.
+ *
+ * DDD is WFC lingo for unsaleable goods (dropped, dented, damaged,
+ * etc) Functionally this works like canceling a transaction, but
+ * marks items with a different trans_status (Z) so these items can be
+ * pulled out in later reports.  A mappable reason code is stored in
+ * localtemptrans.numflag.
  */
 
 $db = Database::tDataConnect();
-$query = "UPDATE localtemptrans SET trans_status='Z'";
+$shrinkReason = (
+    $CORE_LOCAL->get('shrinkReason')
+    && (int) gettype($CORE_LOCAL->get('shrinkReason')) >= 0
+    ) ?
+        (int) $CORE_LOCAL->get('shrinkReason')
+    :
+        0;
+$query = "UPDATE localtemptrans SET trans_status='Z', numflag = $shrinkReason";
 $db->query($query);
 
-$CORE_LOCAL->set("plainmsg","items marked ddd");
+$CORE_LOCAL->set("plainmsg","items marked as shrink/unsellable");
 $CORE_LOCAL->set("End",2);
 
 $_REQUEST['receiptType'] = 'ddd';

@@ -246,6 +246,51 @@ $saveStr = rtrim($saveStr,',').')';
 InstallUtilities::confsave('SpecialDeptMap',$saveStr);
 ?>
 </td></tr>
+
+
+
+<tr><td colspan=2>
+<hr />	<p>
+    Shrink reasons enable users to identify the reason for loss
+    of unsellable products when using the keyboard code SK or
+    DDD to "shrink" the items in the current transaction.
+    Examples include "damaged," and "expired."  If Fannie is
+    used, the mappings need to match Fannie's reason codes,
+    which can be configured via an admin tool in Fannie.
+</p></td></tr>
+<tr><td>
+<b>Number of Shrink Codes/Reasons</b>:</td><td>
+<?php
+if (isset($_REQUEST['DDD_COUNT']) && is_numeric($_REQUEST['DDD_COUNT'])) $CORE_LOCAL->set('ShrinkReasonCount',$_REQUEST['DDD_COUNT']);
+if ($CORE_LOCAL->get("ShrinkReasonCount") == "") $CORE_LOCAL->set("ShrinkReasonCount",1);
+if ($CORE_LOCAL->get("ShrinkReasonCount") <= 0) $CORE_LOCAL->set("ShrinkReasonCount",1);
+printf("<input type=text size=4 name=DDD_COUNT value=\"%d\" />\n",
+	$CORE_LOCAL->get('ShrinkReasonCount'));
+InstallUtilities::paramSave('ShrinkReasonCount',$CORE_LOCAL->get('ShrinkReasonCount'));
+?>
+</td></tr><tr><td>
+<b>Shrink Code Mapping(s)</b>:</td><td>
+<?php
+if (isset($_REQUEST['DDD_MAPPINGS'])) $CORE_LOCAL->set('ShrinkCodeMappings',$_REQUEST['DDD_MAPPINGS']);
+$sconf = $CORE_LOCAL->get('ShrinkCodeMappings');
+if (!is_array($sconf)) $sconf = array('default reason code');
+for($i=0;$i<$CORE_LOCAL->get('ShrinkReasonCount');$i++){
+	echo "[$i] => " . '<input type="text" name="DDD_MAPPINGS[]" value="'
+	. ((isset($sconf[$i])) ? $sconf[$i] : '')
+	. '"></input>' . "\n";
+	echo "<br />";
+}
+$save = array();
+$tmp_count = 0;
+foreach($sconf as $r){
+	$save[] = $r;
+	if ($tmp_count == $CORE_LOCAL->get("ShrinkReasonCount")-1)
+		break;
+	$tmp_count++;
+}
+// TODO: add sanity checks, particularly for nil
+InstallUtilities::paramSave('ShrinkCodeMappings',$save);
+?></td></tr>
 <tr><td colspan=2>
 <hr />
 <input type=submit name=scansubmit value="Save Changes" />
